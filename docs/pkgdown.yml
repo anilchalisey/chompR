@@ -1,0 +1,8 @@
+pandoc: 2.2.1
+pkgdown: 1.1.0
+pkgdown_sha: ~
+articles: []
+urls:
+  reference: https://anilchalisey.github.io/chompR//reference
+  article: https://anilchalisey.github.io/chompR//articles
+
