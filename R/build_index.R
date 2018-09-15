@@ -1,4 +1,4 @@
-#' Build insex for HISAT2
+#' Build index for HISAT2
 #'
 #' \code{build_index} for mapping reads using HISAT2. This actually downloads the
 #' pre-compiled index available on the HISAT2 website:

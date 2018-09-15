@@ -68,6 +68,10 @@ reference:
   - title: Miscellaneous functions
     contents:
       - run_great
+      - peak2Granges
+      - Granges2saf
+      - Granges2df
+      - chain
       
   
 

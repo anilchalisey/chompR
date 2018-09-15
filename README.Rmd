@@ -204,7 +204,7 @@ Importantly, if the user has already run the analysis once and read QC and align
 
 ## Other functions
 
-The package also contains several functions to directly run several tools from within R.  These all begin with \code{run_} and include \code{run_fastqc}, \code{run_multiqc}, \code{run_hisat2}, \code{run_macs2}, \code{run_sambamba}, \code{run_samview}, \code{run_samsort}, \code{run_samindex}, \code{run_samflagstat}.  Additional functions include those to import MACS2 format peak files into R (\code{peak2Granges}) and to annotate peaks (\code{annotate_peaks}).
+The package also contains several functions to directly run several tools from within R.  These all begin with \code{run_} and include \code{run_fastqc}, \code{run_multiqc}, \code{run_hisat2}, \code{run_macs2}, \code{run_sambambadup}, \code{run_samview}, \code{run_samsort}, \code{run_samindex}, \code{run_samflagstat}.  Additional functions include those to import MACS2 format peak files into R (\code{peak2Granges}) and to annotate peaks (\code{annotate_peaks}).
 
 ## Output
 
