@@ -1,2 +1,316 @@
-# chompR
-An R-based pipeline to analyse chromatin modification high throughput    sequencing data. This pipeline performs quality control of reads, performs peak-calling,    differential peak-calling, and pathway enrichment analyses.
+# chompR <img src="man/figures/logo.png" align="right" />
+
+The chompR package is designed to perform peak-calling and differential
+analysis of ChIP or ATAC-seq data. It provides tools to:
+
+  - perform quality control of raw reads in fastq format and generate
+    HTML reports (using FASTQC and MULTIQC)
+  - perform read alignment using HISAT2 and sort and filter alignment
+    files
+  - perform quality control of aligned reads
+  - perform peak-calling using MACS2
+  - run differential analysis using DESeq2, and to export the results
+    into easily readable tab-delimited files
+  - perform pathway analysis
+
+The chompR package does not attempt to replace the tools it uses, but
+instead provides an automated environment in which to use them.
+
+The website for chompR may be found
+[here](https://anilchalisey.github.io/chompR/).
+
+# Installation
+
+## Command line tools
+
+The workflow used by chompR requires the installation of several
+command-line tools: [Fastqc
+(v0.11.7)](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/Fastqc%5D),
+[MultiQC (v1.6)](http://multiqc.info/), [fastp
+(v0.19.4)](https://github.com/OpenGene/fastp), [SAMtools
+(v1.9)](http://www.htslib.org/), [Sambamba
+(v0.6.7)](http://lomereiter.github.io/sambamba/), [HISAT2
+(v2.1.0)](https://ccb.jhu.edu/software/hisat2/index.shtml), [MACS
+(v2.1.0)](https://github.com/taoliu/MACS), and [featureCounts
+(v1.6.2)](http://subread.sourceforge.net/). Installation instructions
+for these may be found at their respective websites, but a guide is
+given below for convenience.
+
+If using a Unix-based system, open up a terminal and follow the commands
+as is. If using the windows subsystem for linux (WSL) on Windows 10 then
+WSL must first be set up as detailed
+[here](https://docs.microsoft.com/en-us/windows/wsl/install-win10). Once
+WSL is up and running, then the tools may be installed as on any
+Unix-based system.
+
+It is assumed that root priviliges are available (if necessary) - if
+not, then a system administrator may need to install these for you.
+
+### Fastqc
+
+``` bash
+cd ~
+wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.7.zip
+unzip fastqc_v0.11.7.zip
+cd FastQC
+chmod 755 fastqc
+
+# If using WSL
+cd /usr/local/bin
+sudo ln -s ~/Fastqc/fastqc .
+
+# If using other Unix
+cd ~/bin
+ln -s ~/Fastqc/fastqc .
+```
+
+### MultiQC
+
+To run MultiQC ensure there is a working python distribution.
+
+``` bash
+pip install multiqc
+```
+
+### fastp
+
+``` bash
+cd ~
+wget http://opengene.org/fastp/fastp
+chmod 755 fastp
+
+# If using WSL
+cd /usr/local/bin
+sudo ln -s ~/fastp .
+
+# If using other Unix
+cd ~/bin
+ln -s ~/fastp .
+```
+
+### Sambamba
+
+``` bash
+cd ~
+wget https://github.com/biod/sambamba/releases/download/v0.6.7/sambamba_v0.6.7_linux.tar.bz2
+tar xvjf sambamba_v0.6.7_linux.tar.bz2
+chmod 755 sambamba
+
+# If using WSL
+cd /usr/local/bin
+sudo ln -s ~/sambamba .
+
+# If using other Unix
+cd ~/bin
+ln -s ~/sambamba .
+```
+
+### Hisat2
+
+``` bash
+cd ~
+wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/downloads/hisat2-2.1.0-Linux_x86_64.zip
+unzip hisat2-2.1.0-Linux_x86_64.zip
+
+# If using WSL
+cd /usr/local/bin
+sudo ln -s ~/hisat2-2.1.0/hisat2_* .
+
+# If using other Unix
+cd ~/bin
+ln -s ~/hisat2-2.1.0/hisat2_* .
+```
+
+### MACS2
+
+To run MACS2 ensure there is a working python (\>2.7) distribution. GCC
+is also required to compile `.c` codes (this should be pre-installed
+with your UNIX distribution) and python header files are needed.
+Therefore, `python-dev` must also be installed.
+
+``` bash
+cd ~
+sudo apt install python-dev
+pip install MACS2
+```
+
+``` bash
+cd ~
+wget -O subread.tar.gz https://sourceforge.net/projects/subread/files/subread-1.6.2/subread-1.6.2-Linux-x86_64.tar.gz/download
+tar xvf subread.tar.gz
+
+# If using WSL
+cd /usr/local/bin
+sudo ln -s ~/subread-1.6.2-Linux-x86_64/bin/sub* .
+sudo ln -s ~/subread-1.6.2-Linux-x86_64/bin/exactSNP .
+sudo ln -s ~/subread-1.6.2-Linux-x86_64/bin/featureCounts .
+sudo ln -s ~/subread-1.6.2-Linux-x86_64/bin/utilities/* .
+
+# If using other Unix
+cd ~/bin
+sudo ln -s ~/subread-1.6.2-Linux-x86_64/bin/sub* .
+sudo ln -s ~/subread-1.6.2-Linux-x86_64/bin/exactSNP .
+sudo ln -s ~/subread-1.6.2-Linux-x86_64/bin/featureCounts .
+sudo ln -s ~/subread-1.6.2-Linux-x86_64/bin/utilities/* .
+```
+
+### R package dependencies
+
+There are a number of dependencies to the chompR package detailed in the
+`DESCRIPTION` file. These are either CRAN or Bioconductor packages.
+These dependencies will automatically install when installing chompR.
+
+### Install chompR
+
+Once all dependencies are installed, then chompR may be installed as
+follows:
+
+``` r
+devtools::install_github("anilchalisey/chompR", build_vignettes = TRUE)
+```
+
+## Usage
+
+The entire workflow of chompR may be run by a call to a single function
+`run_chip()` or `run_atac()`, as shown
+below.
+
+``` r
+result_chip <- run_chip(sample.info = `system.file("extdata", "paired-example.txt", pkg ="chompR")`,
+                  reference = c("WT", "KO1", "KO2"), species = "human", output.dir = "results-chip",
+                  threads = NULL, index.dir = NULL)
+```
+
+The arguments to the `run_chip()` and `run_atac()` functions are:
+
+### sample.info:
+
+This is the path to a tab-delimited file with at least the columns:
+
+  - `condition`: treatment or condition labels on the basis of which the
+    differential analysis will be performed (e.g. “CONTROL”, “TREATED”;
+    or “WILD-TYPE”, “KNOCK-OUT1”, “KNOCK-OUT2”).
+  - `sample`: names of the samples - these labels will be used in plots
+    and as sample column headers in the output.
+  - `file1`: absolute or relative path to fastq files.
+
+Optional columns include:
+
+  - `file2`: if fastq files and PE reads, then this column should also
+    be present, specifying the absolute or relative paths to the second
+    pair of fastq reads.  
+    \# `batch`: if a batch effect is to be included in the design, then
+    this should be identified under this column (e.g. litter number or
+    sequencing run). \# `input1`: if ChIP-seq and input samples were
+    used then the path to the fastq file for the input matching file1 in
+    the same row should be included here. \# `input2`: same as input1,
+    but if PE reads, then the second pair should be specified here.
+
+Dummy examples of the tab-delimited files accepted by chompR may be
+found at `system.file("extdata", "paired-example.txt", pkg = "chompR")`,
+`system.file("extdata", "sinle-example.txt", pkg = "chompR")`, and
+`system.file("extdata", "quants-example.txt", pkg = "chompR")`.
+
+### reference:
+
+The order in which the condition labels should be evaluated when
+performing differential analysis. For example, c(“A”, “B”, “C”, “D”)
+would mean “A” is the reference condition to which “B”, “C” and “D” are
+compared; in addition, “C” and “D” will be compared to “B”, and “D” will
+be compared to “C”. If  then the comparisons will be arranged
+alphabetically.
+
+### species:
+
+May be one of “human” or “mouse” - other options will be added in later
+versions.
+
+### output.dir:
+
+Directory to which results should be saved.
+
+### threads:
+
+Number of threads to be used when parallelisation is possible. If `NULL`
+then one less than the maximum numbre of threads available will be used.
+
+### index.dir:
+
+The path to the hisat2 index.
+
+Other arguments are also possible, and details for these may be found in
+the manual, but for most users, the default settings are satisfactory.
+
+Importantly, if the user has already run the analysis once and read QC
+and alignment has already occurred, then this will be detected and these
+steps will be skipped (provided the same output directory is specified).
+
+## Other functions
+
+The package also contains several functions to directly run several
+tools from within R. These all begin with  and include , , , , , , , , .
+Additional functions include those to import MACS2 format peak files
+into R () and to annotate peaks ().
+
+## Output
+
+Once complete, all the results will be saved in the specified output
+directory with the following structure:
+
+    #>                  levelName
+    #> 1  results                
+    #> 2   ¦--alignment_stats.txt
+    #> 3   ¦--bam                
+    #> 4   ¦--consensus          
+    #> 5   ¦--cross-correlation  
+    #> 6   ¦--differential       
+    #> 7   ¦--fastqc             
+    #> 8   ¦--index              
+    #> 9   ¦--multiqc            
+    #> 10  ¦--filteredbam        
+    #> 11  ¦--shifted            
+    #> 12  ¦--trimmed            
+    #> 13  ¦--peaks              
+    #> 14  ¦--DESeq2             
+    #> 15  °--fragmentLength
+
+The directories `DESeq2`, `fastqc`, and `multiqc` contain the results of
+the respective analyses including relevant plots. The `index` directory
+contains the hisat2 index for human or mouse; it will only be creeated
+if a pre-existing index was not specified beforehand. The `bam`,
+`filteredbam`, `trimmedbam`, and `shifted` directories contain BAM
+files. The `shifted` directory only exists for ATAC-seq analysis and
+contains BAM files whose reads have been shifted to take account of
+transposon insertion. The `peaks` and `consensus` directories contain
+MACS2 called peaks and consensus peaks respectively. The `differential`
+directory contains the results of the a binary differential analysis
+i.e. peaks present or absent in each sample. The `cross-correlation` and
+`fragmentlength` directories are only created for ChIP\_seq or ATAC-seq
+respectively (i.e. they are mutually exclusive) and contain QC plots
+following alignment. The `alignment_stats.txt` file contains simple
+alignment statistics.
+
+## Running only part of the chompR pipeline
+
+Importantly, if the user has already run the analysis once and read QC
+and alignment has already occurred, then this will be detected and these
+steps will be skipped (provided the same output directory is specified).
+
+## Pathway analysis
+
+GREAT analysis (using the GREAT website) is performed using the package
+rGREAT. A wrapper script, which converts regions into hg19 co-ordinates
+(if using “human”) and then runs the rGREAT package, is included.
+
+``` r
+peaks <- peak2Granges("peaks/results.narrowPeak")
+pathway <- run_great(regions = peaks, species = "human")
+```
+
+This may be repeated as necessary for the other comparisons.
+
+## About chompR
+
+The chompR package has been developed in the Chris O’Callaghan Group at
+the Centre for Cellular and Molecular Biology, University of Oxford by
+Anil Chalisey and Chris O’Callaghan.

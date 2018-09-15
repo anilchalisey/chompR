@@ -1,0 +1,72 @@
+url: https://anilchalisey.github.io/chompR/
+
+template:
+  params:
+    bootswatch: cosmo
+
+authors:
+  Anil Chalisey:
+    href: https://github.com/anilchalisey
+  
+reference:
+  - title: Pipeline functions
+    contents: 
+      - run_chip
+      - run_atac
+      - align_dna
+  
+  - title: Data import functions
+    contents: 
+      - check_sample
+      - sanity_check
+  
+  - title: FASTQ analysis
+    contents:
+      - run_fastqc
+      - trim_fastq
+      - run_multiqc
+      
+  - title: HISAT2 functions
+    contents:
+      - build_index
+      - run_hisat2
+  
+  - title: BAM file manipulation functions
+    contents:
+      - run_sambamba
+      - run_samsort
+      - run_samview
+      - run_samindex
+      - run_samflagstat
+      - shift_bam
+      - run_featurecounts
+      - create_bw
+  
+  - title: Alignment QC functions
+      - cc_chip
+      - fl_atac
+      - qc_alignment
+      - qc_alignment2
+      
+  - title: Peak calling and related functions
+      - annotate_peaks
+      - consensus_peaks
+      - run_macs2
+      - plot_peaksummary
+  
+  - title: Differential analysis
+    contents:
+      - deseq2_analysis
+      - exploratory_analysis
+      
+  - title: Plotting functions
+    contents:
+      - starts_with("make_")
+      
+  - title: Miscellaneous functions
+    contents:
+      - run_great
+      - annotate_data
+      
+  
+
