@@ -43,12 +43,14 @@ reference:
       - create_bw
   
   - title: Alignment QC functions
+    contents:
       - cc_chip
       - fl_atac
       - qc_alignment
       - qc_alignment2
       
   - title: Peak calling and related functions
+    contents:
       - annotate_peaks
       - consensus_peaks
       - run_macs2
