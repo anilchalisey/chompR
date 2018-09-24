@@ -7,7 +7,7 @@ Maintainer: Anil Chalisey <anilchalisey@gmail.com>
 Description: An R-based pipeline to analyse chromatin modification high throughput 
   sequencing data. This pipeline performs quality control of reads, performs peak-calling, 
   differential peak-calling, and pathway enrichment analyses.
-Depends: R (>= 3.5.0)
+Depends: R (>= 3.4.0)
 SystemRequirements: FastQC, MultiQC, fastp, samtools, sambamba, hisat2, MACS2, featureCounts
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
